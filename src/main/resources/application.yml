@@ -1,0 +1,13 @@
+server:
+  port: 9999
+spring:
+  application:
+    name: rabbitdemo
+  rabbitmq:
+    addresses: 101.132.109.12
+    username: guest
+    password: guest
+    virtual-host: /
+    listener:
+      simple:
+        acknowledge-mode: manual  # ÷∂ØACK
