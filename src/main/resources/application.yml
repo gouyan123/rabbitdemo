@@ -11,3 +11,7 @@ spring:
     listener:
       simple:
         acknowledge-mode: manual  # ÷∂ØACK
+
+rabbitmq:
+  consumer:
+     state: "on"
