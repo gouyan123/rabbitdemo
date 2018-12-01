@@ -36,7 +36,7 @@ public class MQClientMonitor {
     /**
      * 所有的队列监听容器MAP
      */
-    private final Map<String, SimpleMessageListenerContainer> allQueue2ContainerMap = new ConcurrentHashMap<>();
+    private final Map<String, SimpleMessageListenerContainer> allQueueContainerMap = new ConcurrentHashMap<>();
 
     /**
      * 重置消息队列并发消费者数量
@@ -57,8 +57,6 @@ public class MQClientMonitor {
 
     /**
      * 重启对消息队列的监听
-     * @param queueName
-     * @return
      */
     public boolean restartMessageListener(String queueName) {
         SimpleMessageListenerContainer container = findContainerByQueueName(queueName);
@@ -69,12 +67,12 @@ public class MQClientMonitor {
 
     /**
      * 停止对消息队列的监听
-     * @param queueName
-     * @return
      */
     public boolean stopMessageListener(String queueName) {
+        //findContainerByQueueName(queueName) 找到监听 该队列的 消费者集合
         SimpleMessageListenerContainer container = findContainerByQueueName(queueName);
         Assert.state(container.isRunning(), String.format("消息队列%s对应的监听容器未运行！", queueName));
+        //关闭 消费者监听器 集合
         container.stop();
         return true;
     }
@@ -85,13 +83,13 @@ public class MQClientMonitor {
      */
     public List<MessageQueueDatail> statAllMessageQueueDetail() {
         List<MessageQueueDatail> queueDetailList = new ArrayList<>();
-//        getQueue2ContainerAllMap().entrySet().forEach(entry -> {
+//        getQueueContainerAllMap().entrySet().forEach(entry -> {
 //            String queueName = entry.getKey();
 //            SimpleMessageListenerContainer container = entry.getValue();
 //            MessageQueueDatail deatil = new MessageQueueDatail(queueName, container);
 //            queueDetailList.add(deatil);
 //        });
-        for (Map.Entry<String, SimpleMessageListenerContainer> entry : getQueue2ContainerAllMap().entrySet()){
+        for (Map.Entry<String, SimpleMessageListenerContainer> entry : getQueueContainerAllMap().entrySet()){
             String queueName = entry.getKey();
             SimpleMessageListenerContainer container = entry.getValue();
             MessageQueueDatail deatil = new MessageQueueDatail(queueName, container);
@@ -101,42 +99,36 @@ public class MQClientMonitor {
     }
 
     /**
-     * 根据队列名查找消息监听容器
-     * @param queueName
-     * @return
+     * 根据队列名查找消息监听器的集合
      */
     private SimpleMessageListenerContainer findContainerByQueueName(String queueName) {
         String key = StringUtils.trim(queueName);
-        SimpleMessageListenerContainer container = getQueue2ContainerAllMap().get(key);
+        //
+        SimpleMessageListenerContainer container = getQueueContainerAllMap().get(key);
         Assert.notNull(container, String.format(CONTAINER_NOT_EXISTS, key));
         return container;
     }
-
-    private Map<String, SimpleMessageListenerContainer> getQueue2ContainerAllMap() {
-        //hasInit表示 allQueue2ContainerMap集合是否初始化
+    /**
+     * getQueueContainerAllMap() 将队列名称作为key，监听队列的消费端监听器集合作为value存入allQueueContainerMap
+     * */
+    private Map<String, SimpleMessageListenerContainer> getQueueContainerAllMap() {
+        //hasInit表示 allQueueContainerMap集合是否初始化
         if (!hasInit) {
-            //allQueue2ContainerMap 所有的队列的监听容器的集合
-            synchronized (allQueue2ContainerMap) {
+            //allQueueContainerMap 所有的队列的监听容器的集合
+            synchronized (allQueueContainerMap) {
                 if (!hasInit) {
-//                    registry.getListenerContainers().forEach(container -> {
-//                        SimpleMessageListenerContainer simpleContainer = (SimpleMessageListenerContainer) container;
-//                        Arrays.stream(simpleContainer.getQueueNames()).forEach(queueName ->
-//                        allQueue2ContainerMap.putIfAbsent(StringUtils.trim(queueName), simpleContainer));
-//                    });
                     //registry.getListenerContainers() 获取 队列监听者集合；
                     for (MessageListenerContainer container : registry.getListenerContainers()){
                         SimpleMessageListenerContainer simpleContainer = (SimpleMessageListenerContainer) container;
-//                        Arrays.stream(simpleContainer.getQueueNames()).forEach(queueName ->
-//                        allQueue2ContainerMap.putIfAbsent(StringUtils.trim(queueName), simpleContainer));
                         for (String queueName: simpleContainer.getQueueNames()){
-                            allQueue2ContainerMap.putIfAbsent(StringUtils.trim(queueName), simpleContainer);
+                            allQueueContainerMap.putIfAbsent(StringUtils.trim(queueName), simpleContainer);
                         }
                     }
                     hasInit = true;
                 }
             }
         }
-        return allQueue2ContainerMap;
+        return allQueueContainerMap;
     }
 
 

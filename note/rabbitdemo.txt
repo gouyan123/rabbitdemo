@@ -1,0 +1,2 @@
+---RabbitListenerEndpointRegistry：
+1、持有 listenerContainers成员变量，保存所有 rabbitmq队列监听器，即@RabbitListener注释的方法和类；
