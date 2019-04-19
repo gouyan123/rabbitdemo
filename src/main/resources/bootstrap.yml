@@ -1,0 +1,32 @@
+eureka:
+  client:
+    registerWithEureka: true        # 所有服务都要作为 eureka客户端 注册到 eureka服务端；
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://172.17.1.245:8010/eureka/  #  http://eureka-peer2:8016/eureka/ http://172.17.1.245:8010/eureka/
+  instance:
+    preferIpAddress: true
+
+spring:
+  application:
+    name: rabbitdemo
+
+  profiles:
+    active: dev
+
+  cloud:
+    config:
+      discovery:
+        enabled: true       #开启discovery，config客户端 通过eureka服务端 发现 config服务端；
+        serviceId: config-server        # config服务端 在eureka服务端的 serviceId
+      username: user        # 登录 config服务端 用户名和密码
+      password: 12345678
+      overrideNone: false       # 不覆盖本地配置
+      failFast: true
+      name: ${spring.application.name}
+      profile: ${spring.profiles.active}
+      # git仓库中，可以使用label来做不同版本的配置管理，默认是master，可以用来做版本管理。比如“2.0”
+      label: 'master'
+
+service:
+  instance: node1

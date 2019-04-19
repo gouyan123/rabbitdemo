@@ -7,11 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * @author Levin
- * @since 2018/4/2 0002
  */
 @RestController
-@RequestMapping(value = "/books")
 public class BookController {
 
     private final RabbitTemplate rabbitTemplate;
@@ -21,7 +18,7 @@ public class BookController {
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    @GetMapping
+    @RequestMapping(value = "/books")
     public void defaultMessage() {
         Book book = new Book();
         book.setId("1");
